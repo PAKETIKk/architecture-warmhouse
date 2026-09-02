@@ -23,16 +23,21 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
 
-      - name: Install PlantUML
+      - name: Download PlantUML
         run: |
-          sudo apt-get update
-          sudo apt-get install -y plantuml
+          wget -O plantuml.jar \
+            https://github.com/plantuml/plantuml/releases/latest/download/plantuml.jar
+
+      - name: Check PlantUML version
+        run: |
+          java -jar plantuml.jar -version
 
       - name: Generate Diagrams
         run: |
-          find diagrams -name "*.puml" -print -exec plantuml -tpng {} \;
+          find diagrams -name "*.puml" -print -exec \
+            java -jar plantuml.jar -tpng {} \;
 
       - name: Check generated files
         run: |
