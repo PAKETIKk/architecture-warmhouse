@@ -1,0 +1,57 @@
+@startuml
+title Контейнерная диаграмма системы
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Container.puml
+' Пользователи
+Person(user, "Пользователь", 'Пользователь приложения компании «Тёплый дом»')
+' Система
+Container_Boundary(system, "Система «Тёплый дом»") {
+' Мобильное, веб приложения и API Gateway
+  Container(WebApp, "Веб приложение", "React, TypeScript", "Управляет взаимодействием с пользователем")
+  Container(MobileApp, "Мобильное приложение", "Kotlin, Swift", "Управляет взаимодействием с пользователем")
+  Container(ApiGateway, "API Gateway", "NGINX", "Обрабатывает входящие запросы и маршрутизирует их к соответствующим сервисам")
+' Сервисы приложения
+  Container(SensorService, "Sensor Service", "Go", "Реализует функциональность управления датчиками")
+  Container(UserService, "User Service", "Go", "Реализует функциональность управления пользователями")
+  Container(ScenarioService, "Scenario Service", "Go", "Реализует функциональность управления сценариями, как пользовательскими, так и шаблонными")
+  Container(CameraService, "Camera Service", "Go", "Управляет камерами, настройками и доступом к видеопотокам")
+  Container(MediaServer, "Media Server", "MediaMTX", "Получает, преобразует и передаёт видеопотоки камер")
+' MQTT брокер
+  Container(MqttBroker, "MQTT Broker", "Mosquitto", "Обеспечивает обмен сообщениями между датчиками и сервисами приложения")
+' СУБД
+  ContainerDb(UserDatabase, "User Database", "PostgreSQL", "Хранит данные пользователей")
+  ContainerDb(SensorDatabase, "Sensor Database", "PostgreSQL", "Хранит данные датчиков")
+  ContainerDb(CameraDatabase, "Camera Database", "PostgreSQL", "Хранит данные камер")
+  ContainerDb(ScenarioDatabase, "Scenario Database", "PostgreSQL", "Хранит данные сценариев")
+}
+' Внешние системы
+System_Ext(home, "Дом N", 'Дом пользователя')
+' Взаимодействия пользователя
+user ..> WebApp : "Использует приложение"
+user ..> MobileApp : "Использует приложение"
+' Взаимодействия приложений
+WebApp ..> ApiGateway : "Отправляет запросы"
+MobileApp ..> ApiGateway : "Отправляет запросы"
+' Взаимодействия ApiGateway
+ApiGateway ..> SensorService : "Пересылает запросы к сервису датчиков"
+ApiGateway ..> CameraService : "Пересылает запросы к сервису камер"
+ApiGateway ..> UserService : "Пересылает запросы к сервису пользователей"
+ApiGateway ..> ScenarioService : "Пересылает запросы к сервису сценариев"
+' Взаимодействия сервисов с базой данных
+SensorService ..> SensorDatabase : "Читает/Записывает данные"
+CameraService ..> CameraDatabase : "Читает/Записывает данные"
+UserService ..> UserDatabase : "Читает/Записывает данные"
+ScenarioService ..> ScenarioDatabase : "Читает/Записывает данные"
+' Взаимодействия сервисов
+MediaServer ..> WebApp : "Передаёт видеопоток [WebRTC]"
+MediaServer ..> MobileApp : "Передаёт видеопоток [WebRTC]"
+SensorService ..> MqttBroker : "Публикует и получает сообщения [MQTT]"
+CameraService ..> MediaServer : "Управляет видеопотоками"
+ScenarioService ..> MqttBroker : "Получает события и публикует команды [MQTT]"
+' Взаимодействия MQTT брокер
+MqttBroker ..> home : "Обменивается сообщениями с IoT-устройствами [MQTT]"
+MediaServer ..> home : "Получает видеопотоки с камер [RTSP]"
+' Подсказка для рендера
+user -[hidden]down-> MobileApp
+MobileApp -[hidden]down-> ApiGateway
+WebApp -[hidden]left-> MobileApp
+@enduml
