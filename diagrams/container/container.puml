@@ -4,26 +4,35 @@ title Контейнерная диаграмма системы
 !includeurl ../../uml-lib/C4_Container.puml
 ' Пользователи
 Person(user, "Пользователь", 'Пользователь приложения компании «Тёплый дом»')
+LAYOUT_TOP_DOWN()
 ' Система
 Container_Boundary(system, "Система «Тёплый дом»") {
 ' Мобильное, веб приложения и API Gateway
-  Container(WebApp, "Веб приложение", "React, TypeScript", "Управляет взаимодействием с пользователем")
-  Container(MobileApp, "Мобильное приложение", "Kotlin, Swift", "Управляет взаимодействием с пользователем")
-  Container(ApiGateway, "API Gateway", "NGINX", "Обрабатывает входящие запросы и маршрутизирует их к соответствующим сервисам")
-' Сервисы приложения
-  Container(DeviceService, "Device Service", "Go", "Реализует функциональность управления устройствами")
-  Container(UserService, "User Service", "Go", "Реализует функциональность управления пользователями")
-  Container(ScenarioService, "Scenario Service", "Go", "Реализует функциональность управления сценариями действий и уведомлений, как пользовательскими, так и шаблонными")
-  Container(NotificationService, "Notification Service", "Go", "Обеспечивает функциональность уведомлений")
-  Container(MediaServer, "Media Server", "MediaMTX", "Получает, преобразует и передаёт видеопотоки камер")
+  together {
+    Container(WebApp, "Веб приложение", "React, TypeScript", "Управляет взаимодействием с пользователем")
+    Container(MobileApp, "Мобильное приложение", "Kotlin, Swift", "Управляет взаимодействием с пользователем")
+  }
+  together {
+    Container(ApiGateway, "API Gateway", "NGINX", "Обрабатывает входящие запросы и маршрутизирует их к соответствующим сервисам")
+    Container(MediaServer, "Media Server", "MediaMTX", "Получает, преобразует и передаёт видеопотоки камер")
+  }
+
+
+  together {
+    ' Сервисы приложения
+    Container(DeviceService, "Device Service", "Go", "Реализует функциональность управления устройствами")
+    Container(NotificationService, "Notification Service", "Go", "Обеспечивает функциональность уведомлений")
+    Container(UserService, "User Service", "Go", "Реализует функциональность управления пользователями")
+    Container(ScenarioService, "Scenario Service", "Go", "Реализует функциональность управления сценариями действий и уведомлений, как пользовательскими, так и шаблонными")
+    ' СУБД
+    ContainerDb(UserDatabase, "User\nDatabase", "PostgreSQL", "Хранит данные\nпользователей")
+    ContainerDb(DeviceDatabase, "Device\nDatabase", "PostgreSQL", "Хранит данные\nустройств")
+    ContainerDb(ScenarioDatabase, "Scenario\nDatabase", "PostgreSQL", "Хранит данные\nсценариев")
+    ContainerDb(NotificationDatabase, "Notification\nDatabase", "PostgreSQL", "Хранит данные\nуведомлений")
+  }
 ' Брокеры сообщений
   Container(MqttBroker, "MQTT Broker", "Mosquitto", "Обеспечивает обмен сообщениями между устройствами и сервисами приложения")
   Container(Kafka, "Apache Kafka", "Kafka", "Обеспечивает обмен сообщениями между сервисами приложения")
-' СУБД
-  ContainerDb(UserDatabase, "User Database", "PostgreSQL", "Хранит данные пользователей")
-  ContainerDb(DeviceDatabase, "Device Database", "PostgreSQL", "Хранит данные устройств")
-  ContainerDb(ScenarioDatabase, "Scenario Database", "PostgreSQL", "Хранит данные сценариев")
-  ContainerDb(NotificationDatabase, "Notification Database", "PostgreSQL", "Хранит данные уведомлений")
 }
 ' Внешние системы
 System_Ext(home, "Дом N", 'Дом пользователя')
@@ -39,10 +48,10 @@ ApiGateway ..> UserService : "Пересылает запросы к серви�
 ApiGateway ..> ScenarioService : "Пересылает\nзапросы к\nсервису сценариев"
 ApiGateway ..> NotificationService : "Пересылает\nзапросы к\nсервису уведомлений"
 ' Взаимодействия сервисов с базой данных
-DeviceService ..> DeviceDatabase : "Читает/Записывает\nданные"
-UserService ..> UserDatabase : "Читает/Записывает\nданные"
-ScenarioService ..> ScenarioDatabase : "Читает/Записывает\nданные"
-NotificationService ..> NotificationDatabase : "Читает/Записывает\nданные"
+DeviceService .right.> DeviceDatabase : "Читает\nи\nзаписывает\nданные"
+UserService .right.> UserDatabase : "Читает\nи\nзаписывает\nданные"
+ScenarioService .right.> ScenarioDatabase : "Читает\nи\nзаписывает\nданные"
+NotificationService .right.> NotificationDatabase : "Читает\nи\nзаписывает\nданные"
 ' Взаимодействия сервисов
 MediaServer ..> WebApp : "Передаёт видеопоток [WebRTC]"
 MediaServer ..> MobileApp : "Передаёт видеопоток [WebRTC]"
@@ -61,11 +70,19 @@ MediaServer <.> Kafka : "Публикует/получает\nсобытия"
 NotificationService <.> Kafka : "Публикует/получает\nсобытия"
 ' Подсказка для рендера
 user -[hidden]down-> MobileApp
+user -[hidden]down-> ApiGateway
+WebApp -[hidden]down-> ApiGateway
 MobileApp -[hidden]down-> ApiGateway
-WebApp -[hidden]left-> MobileApp
+ApiGateway -[hidden]down-> DeviceService
+ApiGateway -[hidden]down-> UserService
+ApiGateway -[hidden]down-> ScenarioService
+ApiGateway -[hidden]down-> NotificationService
 
-Kafka -[hidden]down-> DeviceService
-MqttBroker -[hidden]down-> home
+DeviceService -[hidden]down-> Kafka
+ScenarioService -[hidden]down-> Kafka
 
-ApiGateway -[hidden]left-> Kafka
+UserService -[hidden]right-> ScenarioService
+
+MediaServer -[hidden]up-> WebApp
+MediaServer -[hidden]up-> MobileApp
 @enduml
