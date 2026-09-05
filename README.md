@@ -135,7 +135,8 @@
 
 ## Диаграмма кода (Code)
 
-Добавьте одну диаграмму или несколько.
+[Диаграмма классов системы «Тёплый дом»](diagrams\code\code-AllInOneClassDiagram.puml)
+![Диаграмма классов системы «Тёплый дом»](diagrams\code\code-AllInOneClassDiagram.png)
 
 # Задание 3. Разработка ER-диаграммы
 

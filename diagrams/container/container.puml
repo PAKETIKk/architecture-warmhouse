@@ -31,7 +31,7 @@ Container_Boundary(system, "Система «Тёплый дом»") {
     ContainerDb(NotificationDatabase, "Notification\nDatabase", "PostgreSQL", "Хранит данные\nуведомлений")
   }
 ' Брокеры сообщений
-  Container(MqttBroker, "MQTT Broker", "Mosquitto", "Обеспечивает обмен сообщениями между устройствами и сервисами приложения")
+  Container(MqttBroker, "MQTT Broker", "Mosquitto", "Обеспечивает обмен сообщениями между устройствами и сервисами приложения, передачу телеметрии")
   Container(Kafka, "Apache Kafka", "Kafka", "Обеспечивает обмен сообщениями между сервисами приложения")
 }
 ' Внешние системы
@@ -56,11 +56,10 @@ NotificationService .right.> NotificationDatabase : "Читает\nи\nзапи�
 MediaServer ..> WebApp : "Передаёт видеопоток [WebRTC]"
 MediaServer ..> MobileApp : "Передаёт видеопоток [WebRTC]"
 DeviceService ..> MqttBroker : "Публикует и получает сообщения [MQTT]"
-ScenarioService ..> MqttBroker : "Получает события и публикует команды [MQTT]"
 NotificationService ..> WebApp : "Отправляет уведомления [WebSocket]"
 NotificationService ..> MobileApp : "Отправляет уведомления [Push]"
 ' Взаимодействия MQTT брокер
-MqttBroker <.> home : "Обменивается сообщениями с IoT-устройствами [MQTT]"
+MqttBroker <.down.> home : "Обменивается сообщениями с IoT-устройствами [MQTT]"
 MediaServer ..> home : "Получает видеопотоки с камер [RTSP]"
 ' Взаимодействия Kafka
 UserService <.> Kafka : "Публикует/получает\nсобытия"

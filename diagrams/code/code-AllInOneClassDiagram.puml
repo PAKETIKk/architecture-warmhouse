@@ -1,0 +1,246 @@
+@startuml
+title Диаграмма классов системы «Тёплый дом»
+
+package "Управление устройствами" {
+    ' Классы
+    class Device {
+        +UUID id
+        +String name
+        +UUID deviceTypeId
+        +UUID locationId
+        +void create()
+        +void delete()
+    }
+
+    class DeviceType {
+        +UUID id
+        +String name
+        +Boolean isCustom
+        +String description
+        +List<Capability> capabilities
+        +UUID ownerUserId
+        +void create()
+        +void delete()
+    }
+
+    class Location {
+        +UUID id
+        +String name
+        +UUID homeId
+        +void create()
+        +void delete()
+    }
+
+    class Home {
+        +UUID id
+        +String name
+        +UUID ownerUserId
+    }
+
+    class Capability {
+        +UUID id
+        +String name
+        +Boolean isCustom
+        +UserRole requiredUserRole
+        +Action requiredAction
+        +UUID ownerUserId
+        +void create()
+        +void delete()
+    }
+    enum UserRole {
+        OWNER
+        RESIDENT
+        GUEST
+    }
+    enum Action {
+        VIEW
+        CONTROL 
+        MANAGE
+    }
+    Capability .right.> UserRole
+    Capability .right.> Action
+    UserRole -[hidden]down- Action
+
+    ' Связи
+    Device "0..*" -- "1" Location : has
+    Device "0..*" -- "1" DeviceType : has
+
+    DeviceType "0..*" -- "1..*" Capability : has
+    Location "0..*" -- "1" Home : has
+}
+
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+package "Управление сценариями" {
+    ' Классы
+    class Scenario {
+        +UUID id
+        +String name
+        +Boolean isCustom
+        +Boolean isActive
+        +String description [0..1]
+        +JSON definition
+        +UUID ownerUserId
+        +void create()
+        +void update()
+        +void delete()
+    }
+}
+Device -[hidden]right- Scenario
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+package "Управление пользователями" {
+    ' Классы
+    class User {
+        +UUID id
+        +String name
+        +String email
+        +List<UserGroup> userGroups
+        +List<HomeMembership> homeMemberships
+        +void register()
+        +void login()
+        +void logout()
+        +void updateAccount()
+        +void deleteAccount()
+        +void changePassword()
+        +void addGroup()
+        +void removeGroup()
+    }
+
+    class UserGroup {
+        +UUID id
+        +String name
+        +UUID ownerUserId
+        +String description [0..1]
+        +void create()
+        +void delete()
+    }
+
+    class HomeMembership {
+        +UUID id
+        +UUID homeId
+        +UserRole role
+    }
+    enum UserRole {
+        OWNER
+        RESIDENT
+        GUEST
+    }
+    HomeMembership .right.> UserRole
+ 
+    note "**Примечание**\n*HomeMembership - уровень\nдоступа для дома\n*UserGroup - доступ для\nустройств" as Note
+
+    HomeMembership .down. Note
+    UserGroup .down. Note
+
+    class Permission {
+        +UUID id
+        +UUID userGroupId
+        +UUID deviceId
+        +Action action 
+        +void create()
+        +void delete()
+    } 
+    enum Action {
+        VIEW
+        CONTROL 
+        MANAGE
+    }
+    Permission .right.> Action
+
+    ' Связи
+    User "0..*" -- "0..*" UserGroup : belongs to
+    User "1" -- "0..*" HomeMembership : grants access through
+    UserGroup "1" -- "0..*" Permission : has
+}
+Scenario -[hidden]right- User
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+package "Управление уведомлениями" {
+    ' Классы
+    class Notification {
+        +UUID id
+        +UUID recipientUserId
+        +String title
+        +String message
+        +NotificationType type
+        +NotificationSeverity severity
+        +DateTime time
+        +void create()
+        +void delete()
+    }
+
+    class NotificationDelivery {
+        +UUID id
+        +UUID notificationId
+        +DeliveryChannel channel
+        +DeliveryStatus status
+        +DateTime time
+        +void create()
+        +void delete()
+    }
+    enum DeliveryStatus {
+        QUEUED
+        SENT
+        DELIVERED
+        FAILED
+        READ
+    }
+    NotificationDelivery ..> DeliveryStatus
+    enum DeliveryChannel {
+        PUSH
+        WEBSOCKET
+    }
+    NotificationDelivery .right.> DeliveryChannel
+
+    class NotificationRule {
+        +UUID id
+        +String name
+        +Boolean isCustom
+        +UUID ownerUserId
+        +Boolean isActive
+        +NotificationType type
+        +NotificationSeverity severity
+        +DeliveryChannel channel
+        +void create()
+        +void update()
+        +void delete()
+    }
+    Notification -[hidden]down- NotificationRule
+
+    enum NotificationType {
+        DEVICE_STATE_CHANGED
+        SENSOR_ALERT
+        CAMERA_MOTION_DETECTED
+        CAMERA_OFFLINE
+        SCENARIO_EXECUTED
+        SCENARIO_FAILED
+        ACCESS_GRANTED
+        ACCESS_DENIED
+        SYSTEM_ALERT
+        DEVICE_MAINTENANCE_REQUIRED
+    }
+    NotificationRule .left.> NotificationType
+    Notification .right.> NotificationType
+    NotificationType -[hidden]down- NotificationSeverity
+
+    enum NotificationSeverity {
+        INFO
+        SUCCESS
+        WARNING
+        ERROR
+        CRITICAL
+    }
+    NotificationRule .left.> NotificationSeverity
+    Notification .right.> NotificationSeverity
+    NotificationSeverity -[hidden]down- DeliveryChannel
+
+    ' Связи
+    Notification "1" -- "1..*" NotificationDelivery
+}
+User -[hidden]right- Notification
+
+@enduml
