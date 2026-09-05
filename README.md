@@ -113,10 +113,25 @@
 
 ## Диаграмма компонентов (Components)
 
-### 1. Camera Service
+### 1. Device Service
 
-[Компонентная диаграмма Camera Service](diagrams/component/component-CameraService.puml)
-![Компонентная диаграмма Camera Service](diagrams/component/component-CameraService.png)
+[Компонентная диаграмма Camera Service](diagrams/component/component-DeviceService.puml)
+![Компонентная диаграмма Camera Service](diagrams/component/component-DeviceService.png)
+
+### 2. Scenario Service
+
+[Компонентная диаграмма Scenario Service](diagrams/component/component-ScenarioService.puml)
+![Компонентная диаграмма Scenario Service](diagrams/component/component-ScenarioService.png)
+
+### 3. User Service
+
+[Компонентная диаграмма User Service](diagrams/component/component-UserService.puml)
+![Компонентная диаграмма User Service](diagrams/component/component-UserService.png)
+
+### 4. Notification Service
+
+[Компонентная диаграмма Notification Service](diagrams/component/component-NotificationService.puml)
+![Компонентная диаграмма Notification Service](diagrams/component/component-NotificationService.png)
 
 ## Диаграмма кода (Code)
 

@@ -1,33 +1,33 @@
 @startuml
-title Компонентная диаграмма сервиса устройств
+title Компонентная диаграмма сервиса сценариев
 ' Импорт
 !include ../../uml-lib/C4_Component.puml
 ' Система
 Container_Boundary(system, "Система «Тёплый дом»"){
   ' Сервисы
-  Container(DeviceService, "Device Service", "Go", "Реализует функциональность управления устройствами")
+  Container(ScenarioService, "Scenario Service", "Go", "Реализует функциональность управления сценариями")
   Container(ApiGateway, "API Gateway", "NGINX", "Обрабатывает входящие запросы и маршрутизирует их к соответствующим сервисам")
   ' Брокеры сообщений
   Container(Kafka, "Apache Kafka", "Kafka", "Обеспечивает обмен сообщениями между сервисами приложения")  
   Container(MqttBroker, "MQTT Broker", "Mosquitto", "Обеспечивает обмен сообщениями между устройствами и сервисами приложения")
-  ' СУБД Device Service
-  ContainerDb(DeviceDatabase, "Device Database", "PostgreSQL", "Хранит данные DeviceService")
+  ' СУБД Scenario Service
+  ContainerDb(ScenarioDatabase, "Scenario Database", "PostgreSQL", "Хранит данные ScenarioService")
 }
-' Сервис устройств
-Container(DeviceService, "Device Service") {
-' Компоненты сервиса устройств
-  Component(ControllerComponent, "Device Controller","Обрабатывает HTTP-запросы и маршрутизирует их к соответствующим компонентам")
-  Component(ServiceComponent, "Device Service", "Обрабатывает бизнес-логику, связанную с устройствами")
+' Сервис сценариев
+Container(ScenarioService, "Scenario Service") {
+' Компоненты сервиса сценариев
+  Component(ControllerComponent, "Scenario Controller","Обрабатывает HTTP-запросы и маршрутизирует их к соответствующим компонентам")
+  Component(ServiceComponent, "Scenario Service", "Обрабатывает бизнес-логику, связанную с сценариями")
   Component(KafkaComponent, "Kafka Component", "Обеспечивает обмен событиями между сервисами через Kafka")
-  Component(RepositoryComponent, "Repository Layer", "Обеспечивает доступ к данным устройств в базе данных")
+  Component(RepositoryComponent, "Repository Layer", "Обеспечивает доступ к данным сценариев в базе данных")
   Component(MqttComponent, "MQTT Component", "Обеспечивает обмен сообщениями между устройствами и сервисами через MQTT")
 }
 ' Взаимодействия компонентов
-ControllerComponent ..> ServiceComponent : "Вызывает бизнес-логику"
+ControllerComponent ..> ServiceComponent : "Вызывает\nбизнес-логику"
 ServiceComponent ..> RepositoryComponent : "Читает/Записывает\nданные"
 ServiceComponent ..> KafkaComponent : "Публикует/получает\nсобытия"
 ServiceComponent ..> MqttComponent : "Публикует/получает\nсообщения"
-RepositoryComponent ..> DeviceDatabase : "Читает/Записывает\nданные"
+RepositoryComponent ..> ScenarioDatabase : "Читает/Записывает\nданные"
 ' Взаимодействия с сервисами
 ApiGateway ..> ControllerComponent : "Пересылает запросы к компоненту контроллера"
 KafkaComponent ..> Kafka : "Публикует/получает\nсобытия"

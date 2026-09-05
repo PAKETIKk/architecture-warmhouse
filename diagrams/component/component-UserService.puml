@@ -1,0 +1,31 @@
+@startuml
+title Компонентная диаграмма сервиса пользователей
+' Импорт
+!include ../../uml-lib/C4_Component.puml
+' Система
+Container_Boundary(system, "Система «Тёплый дом»"){
+  ' Сервисы
+  Container(UserService, "User Service", "Go", "Реализует функциональность управления пользователями")
+  Container(ApiGateway, "API Gateway", "NGINX", "Обрабатывает входящие запросы и маршрутизирует их к соответствующим сервисам")
+  ' Брокеры сообщений
+  Container(Kafka, "Apache Kafka", "Kafka", "Обеспечивает обмен сообщениями между сервисами приложения")  
+  ' СУБД User Service
+  ContainerDb(UserDatabase, "User Database", "PostgreSQL", "Хранит данные UserService")
+}
+' Сервис пользователей
+Container(UserService, "User Service") {
+' Компоненты сервиса пользователей
+  Component(ControllerComponent, "User Controller","Обрабатывает HTTP-запросы и маршрутизирует их к соответствующим компонентам")
+  Component(ServiceComponent, "User Service", "Обрабатывает бизнес-логику, связанную с пользователями")
+  Component(KafkaComponent, "Kafka Component", "Обеспечивает обмен событиями между сервисами через Kafka")
+  Component(RepositoryComponent, "Repository Layer", "Обеспечивает доступ к данным пользователей в базе данных")
+}
+' Взаимодействия компонентов
+ControllerComponent ..> ServiceComponent : "Вызывает\nбизнес-логику"
+ServiceComponent ..> RepositoryComponent : "Читает/Записывает\nданные"
+ServiceComponent ..> KafkaComponent : "Публикует/получает\nсобытия"
+RepositoryComponent ..> UserDatabase : "Читает/Записывает\nданные"
+' Взаимодействия с сервисами
+ApiGateway ..> ControllerComponent : "Пересылает запросы к компоненту контроллера"
+KafkaComponent ..> Kafka : "Публикует/получает\nсобытия"
+@enduml

@@ -1,0 +1,38 @@
+@startuml
+title Компонентная диаграмма сервиса уведомлений
+' Импорт
+!include ../../uml-lib/C4_Component.puml
+' Система
+Container_Boundary(system, "Система «Тёплый дом»"){
+  ' Приложения
+  Container(WebApp, "Web Application", "React", "Веб-приложение для управления системой «Тёплый дом»")
+  Container(MobileApp, "Mobile Application", "React Native", "Мобильное приложение для управления системой «Тёплый дом»")
+  ' Сервисы
+  Container(NotificationService, "Notification Service", "Go", "Обеспечивает функциональность уведомлений")
+  Container(ApiGateway, "API Gateway", "NGINX", "Обрабатывает входящие запросы и маршрутизирует их к соответствующим сервисам")
+  ' Брокеры сообщений
+  Container(Kafka, "Apache Kafka", "Kafka", "Обеспечивает обмен сообщениями между сервисами приложения")  
+  ' СУБД Notification Service
+  ContainerDb(NotificationDatabase, "Notification Database", "PostgreSQL", "Хранит данные NotificationService")
+}
+' Сервис уведомлений
+Container(NotificationService, "Notification Service") {
+' Компоненты сервиса уведомлений
+  Component(ControllerComponent, "Notification Controller","Обрабатывает HTTP-запросы и маршрутизирует их к соответствующим компонентам")
+  Component(ServiceComponent, "Notification Service", "Обрабатывает бизнес-логику, связанную с уведомлениями")
+  Component(KafkaComponent, "Kafka Component", "Обеспечивает обмен событиями между сервисами через Kafka")
+  Component(RepositoryComponent, "Repository Layer", "Обеспечивает доступ к данным уведомлений в базе данных")
+  Component(NotificationSenderComponent, "Notification Sender", "Отправляет уведомления пользователям через различные каналы (push, websocket)")
+}
+' Взаимодействия компонентов
+ControllerComponent ..> ServiceComponent : "Вызывает\nбизнес-логику"
+ServiceComponent ..> RepositoryComponent : "Читает/Записывает\nданные"
+ServiceComponent ..> KafkaComponent : "Публикует/получает\nсобытия"
+ServiceComponent ..> NotificationSenderComponent : "Отправляет уведомления\nпользователям"
+RepositoryComponent ..> NotificationDatabase : "Читает/Записывает\nданные"
+' Взаимодействия с сервисами
+ApiGateway ..> ControllerComponent : "Пересылает запросы к компоненту контроллера"
+KafkaComponent ..> Kafka : "Публикует/получает\nсобытия"
+NotificationSenderComponent ..> WebApp : "Отправляет уведомления\nчерез WebSocket"
+NotificationSenderComponent ..> MobileApp : "Отправляет уведомления\nчерез push-уведомления"
+@enduml
