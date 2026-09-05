@@ -115,8 +115,8 @@
 
 ### 1. Device Service
 
-[Компонентная диаграмма Camera Service](diagrams/component/component-DeviceService.puml)
-![Компонентная диаграмма Camera Service](diagrams/component/component-DeviceService.png)
+[Компонентная диаграмма Device Service](diagrams/component/component-DeviceService.puml)
+![Компонентная диаграмма Device Service](diagrams/component/component-DeviceService.png)
 
 ### 2. Scenario Service
 
