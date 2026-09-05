@@ -107,13 +107,16 @@
 
 **Диаграмма контейнеров (Containers)**
 
-[Контекстная диаграмма монолитной системы](diagrams/container/container.puml)
+[Контекстная диаграмма системы](diagrams/container/container.puml)
 
-![Контекстная диаграмма монолитной системы](diagrams/container/container.png)
+![Контекстная диаграмма системы](diagrams/container/container.png)
 
 **Диаграмма компонентов (Components)**
 
-Добавьте диаграмму для каждого из выделенных микросервисов.
+## 1. Camera Service
+
+[Компонентная диаграмма Camera Service](diagrams/component/component-CameraService.puml)
+[Компонентная диаграмма Camera Service](diagrams/component/component-CameraService.png)
 
 **Диаграмма кода (Code)**
 

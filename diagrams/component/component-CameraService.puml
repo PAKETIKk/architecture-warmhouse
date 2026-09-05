@@ -1,20 +1,30 @@
 @startuml
 title Компонентная диаграмма сервиса камер
+' Импорт
 !include ../../uml-lib/C4_Component.puml
+' Система
+Container_Boundary(system, "Система «Тёплый дом»"){
+  Container(CameraService, "Camera Service", "Go", "Управляет камерами, настройками и доступом к видеопотокам")
+  Container(ApiGateway, "API Gateway", "NGINX", "Обрабатывает входящие запросы и маршрутизирует их к соответствующим сервисам")
+  Container(Kafka, "Apache Kafka", "Kafka", "Обеспечивает обмен сообщениями между сервисами приложения")  
+  ' СУБД Camera Service
+  ContainerDb(CameraDatabase, "Camera Database", "PostgreSQL", "Хранит данные CameraService")
+}
 ' Сервис камер
 Container_Boundary(CameraService, "Camera Service") {
 ' Компоненты сервиса камер
   Component(ControllerComponent, "Camera Controller","Обрабатывает HTTP-запросы и маршрутизирует их к соответствующим компонентам")
-  Component(ManagerComponent, "Camera Manager", "Управляет камерами, настройками и доступом к видеопотокам")
   Component(ServiceComponent, "Camera Service", "Обрабатывает бизнес-логику, связанную с камерами")
+  Component(KafkaComponent, "Kafka Component", "Обеспечивает обмен событиями между сервисами через Kafka")
   Component(RepositoryComponent, "Repository Layer", "Обеспечивает доступ к данным камер в базе данных")
 }
-' СУБД Camera Service
-ContainerDb(CameraDatabase, "Camera Database", "PostgreSQL", "Хранит данные CameraService")
-' Взаимодействия
+' Взаимодействия компонентов
+ControllerComponent ..> ServiceComponent : "Вызывает бизнес-логику"
 ServiceComponent ..> RepositoryComponent : "Читает/Записывает данные"
+ServiceComponent ..> KafkaComponent : "Публикует/получает события"
 RepositoryComponent ..> CameraDatabase : "Читает/Записывает данные"
-
-
+' Взаимодействия с сервисами
+ApiGateway ..> ControllerComponent : "Пересылает запросы к компоненту контроллера"
+KafkaComponent ..> Kafka : "Публикует/получает события"
 
 @enduml

@@ -1,5 +1,6 @@
 @startuml
 title Контейнерная диаграмма системы
+' Импорт
 !includeurl ../../uml-lib/C4_Container.puml
 ' Пользователи
 Person(user, "Пользователь", 'Пользователь приложения компании «Тёплый дом»')
@@ -15,8 +16,9 @@ Container_Boundary(system, "Система «Тёплый дом»") {
   Container(ScenarioService, "Scenario Service", "Go", "Реализует функциональность управления сценариями, как пользовательскими, так и шаблонными")
   Container(CameraService, "Camera Service", "Go", "Управляет камерами, настройками и доступом к видеопотокам")
   Container(MediaServer, "Media Server", "MediaMTX", "Получает, преобразует и передаёт видеопотоки камер")
-' MQTT брокер
+' Брокеры сообщений
   Container(MqttBroker, "MQTT Broker", "Mosquitto", "Обеспечивает обмен сообщениями между датчиками и сервисами приложения")
+  Container(Kafka, "Apache Kafka", "Kafka", "Обеспечивает обмен сообщениями между сервисами приложения")
 ' СУБД
   ContainerDb(UserDatabase, "User Database", "PostgreSQL", "Хранит данные пользователей")
   ContainerDb(SensorDatabase, "Sensor Database", "PostgreSQL", "Хранит данные датчиков")
@@ -45,17 +47,19 @@ ScenarioService ..> ScenarioDatabase : "Читает/Записывает дан
 MediaServer ..> WebApp : "Передаёт видеопоток [WebRTC]"
 MediaServer ..> MobileApp : "Передаёт видеопоток [WebRTC]"
 SensorService ..> MqttBroker : "Публикует и получает сообщения [MQTT]"
-CameraService ..> MediaServer : "Управляет видеопотоками"
 ScenarioService ..> MqttBroker : "Получает события и публикует команды [MQTT]"
-ScenarioService ..> SensorService : "Вызывает действия"
-ScenarioService ..> CameraService : "Вызывает действия"
 ' Взаимодействия MQTT брокер
 MqttBroker ..> home : "Обменивается сообщениями с IoT-устройствами [MQTT]"
 MediaServer ..> home : "Получает видеопотоки с камер [RTSP]"
+' Взаимодействия Kafka
+SensorService <.> Kafka : "Публикует/получает события"
+ScenarioService <.> Kafka : "Публикует/получает события"
+CameraService <.> Kafka : "Публикует/получает события"
+MediaServer <.> Kafka : "Публикует/получает события"
 ' Подсказка для рендера
 user -[hidden]down-> MobileApp
 MobileApp -[hidden]down-> ApiGateway
 WebApp -[hidden]left-> MobileApp
 
-ApiGateway -[hidden]down-> ScenarioService
+Kafka -[hidden]down-> SensorService
 @enduml
