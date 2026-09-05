@@ -1,6 +1,6 @@
 @startuml
 title Контейнерная диаграмма системы
-!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Container.puml
+!includeurl ../../uml-lib/C4_Container.puml
 ' Пользователи
 Person(user, "Пользователь", 'Пользователь приложения компании «Тёплый дом»')
 ' Система
@@ -47,6 +47,8 @@ MediaServer ..> MobileApp : "Передаёт видеопоток [WebRTC]"
 SensorService ..> MqttBroker : "Публикует и получает сообщения [MQTT]"
 CameraService ..> MediaServer : "Управляет видеопотоками"
 ScenarioService ..> MqttBroker : "Получает события и публикует команды [MQTT]"
+ScenarioService ..> SensorService : "Вызывает действия"
+ScenarioService ..> CameraService : "Вызывает действия"
 ' Взаимодействия MQTT брокер
 MqttBroker ..> home : "Обменивается сообщениями с IoT-устройствами [MQTT]"
 MediaServer ..> home : "Получает видеопотоки с камер [RTSP]"
@@ -54,4 +56,6 @@ MediaServer ..> home : "Получает видеопотоки с камер [R
 user -[hidden]down-> MobileApp
 MobileApp -[hidden]down-> ApiGateway
 WebApp -[hidden]left-> MobileApp
+
+ApiGateway -[hidden]down-> ScenarioService
 @enduml

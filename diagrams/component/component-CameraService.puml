@@ -1,14 +1,19 @@
 @startuml
 title Компонентная диаграмма сервиса камер
-!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+!include ../../uml-lib/C4_Component.puml
 ' Сервис камер
 Container_Boundary(CameraService, "Camera Service") {
 ' Компоненты сервиса камер
-  Component(CameraController, "Camera Controller", "Обрабатывает HTTP-запросы и маршрутизирует их к соответствующим компонентам")
-  Component(CameraManager, "Camera Manager", "Управляет камерами, настройками и доступом к видеопотокам")
-  Component(CameraRepository, "Repository Layer", "Обеспечивает доступ к данным камер в базе данных")
+  Component(ControllerComponent, "Camera Controller","Обрабатывает HTTP-запросы и маршрутизирует их к соответствующим компонентам")
+  Component(ManagerComponent, "Camera Manager", "Управляет камерами, настройками и доступом к видеопотокам")
+  Component(ServiceComponent, "Camera Service", "Обрабатывает бизнес-логику, связанную с камерами")
+  Component(RepositoryComponent, "Repository Layer", "Обеспечивает доступ к данным камер в базе данных")
 }
 ' СУБД Camera Service
+ContainerDb(CameraDatabase, "Camera Database", "PostgreSQL", "Хранит данные CameraService")
+' Взаимодействия
+ServiceComponent ..> RepositoryComponent : "Читает/Записывает данные"
+RepositoryComponent ..> CameraDatabase : "Читает/Записывает данные"
 
 
 
