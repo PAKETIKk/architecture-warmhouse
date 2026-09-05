@@ -111,14 +111,14 @@
 
 ![Контекстная диаграмма системы](diagrams/container/container.png)
 
-**Диаграмма компонентов (Components)**
+## Диаграмма компонентов (Components)
 
-## 1. Camera Service
+### 1. Camera Service
 
 [Компонентная диаграмма Camera Service](diagrams/component/component-CameraService.puml)
-[Компонентная диаграмма Camera Service](diagrams/component/component-CameraService.png)
+![Компонентная диаграмма Camera Service](diagrams/component/component-CameraService.png)
 
-**Диаграмма кода (Code)**
+## Диаграмма кода (Code)
 
 Добавьте одну диаграмму или несколько.
 

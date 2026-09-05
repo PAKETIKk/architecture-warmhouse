@@ -1,0 +1,35 @@
+@startuml
+title Компонентная диаграмма сервиса камер
+' Импорт
+!include ../../uml-lib/C4_Component.puml
+' Система
+Container_Boundary(system, "Система «Тёплый дом»"){
+  ' Сервисы
+  Container(DeviceService, "Device Service", "Go", "Реализует функциональность управления устройствами")
+  Container(ApiGateway, "API Gateway", "NGINX", "Обрабатывает входящие запросы и маршрутизирует их к соответствующим сервисам")
+  ' Брокеры сообщений
+  Container(Kafka, "Apache Kafka", "Kafka", "Обеспечивает обмен сообщениями между сервисами приложения")  
+  Container(MqttBroker, "MQTT Broker", "Mosquitto", "Обеспечивает обмен сообщениями между устройствами и сервисами приложения")
+  ' СУБД Device Service
+  ContainerDb(DeviceDatabase, "Device Database", "PostgreSQL", "Хранит данные DeviceService")
+}
+' Сервис устройств
+Container_Boundary(DeviceService, "Device Service") {
+' Компоненты сервиса устройств
+  Component(ControllerComponent, "Device Controller","Обрабатывает HTTP-запросы и маршрутизирует их к соответствующим компонентам")
+  Component(ServiceComponent, "Device Service", "Обрабатывает бизнес-логику, связанную с устройствами")
+  Component(KafkaComponent, "Kafka Component", "Обеспечивает обмен событиями между сервисами через Kafka")
+  Component(RepositoryComponent, "Repository Layer", "Обеспечивает доступ к данным устройств в базе данных")
+  Component(MqttComponent, "MQTT Component", "Обеспечивает обмен сообщениями между устройствами и сервисами через MQTT")
+}
+' Взаимодействия компонентов
+ControllerComponent ..> ServiceComponent : "Вызывает бизнес-логику"
+ServiceComponent ..> RepositoryComponent : "Читает/Записывает данные"
+ServiceComponent ..> KafkaComponent : "Публикует/получает события"
+ServiceComponent ..> MqttComponent : "Публикует/получает сообщения"
+RepositoryComponent ..> DeviceDatabase : "Читает/Записывает данные"
+' Взаимодействия с сервисами
+ApiGateway ..> ControllerComponent : "Пересылает запросы к компоненту контроллера"
+KafkaComponent ..> Kafka : "Публикует/получает события"
+MqttComponent ..> MqttBroker : "Публикует/получает сообщения"
+@enduml

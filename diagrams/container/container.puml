@@ -11,18 +11,16 @@ Container_Boundary(system, "Система «Тёплый дом»") {
   Container(MobileApp, "Мобильное приложение", "Kotlin, Swift", "Управляет взаимодействием с пользователем")
   Container(ApiGateway, "API Gateway", "NGINX", "Обрабатывает входящие запросы и маршрутизирует их к соответствующим сервисам")
 ' Сервисы приложения
-  Container(SensorService, "Sensor Service", "Go", "Реализует функциональность управления датчиками")
+  Container(DeviceService, "Device Service", "Go", "Реализует функциональность управления устройствами")
   Container(UserService, "User Service", "Go", "Реализует функциональность управления пользователями")
   Container(ScenarioService, "Scenario Service", "Go", "Реализует функциональность управления сценариями, как пользовательскими, так и шаблонными")
-  Container(CameraService, "Camera Service", "Go", "Управляет камерами, настройками и доступом к видеопотокам")
   Container(MediaServer, "Media Server", "MediaMTX", "Получает, преобразует и передаёт видеопотоки камер")
 ' Брокеры сообщений
-  Container(MqttBroker, "MQTT Broker", "Mosquitto", "Обеспечивает обмен сообщениями между датчиками и сервисами приложения")
+  Container(MqttBroker, "MQTT Broker", "Mosquitto", "Обеспечивает обмен сообщениями между устройствами и сервисами приложения")
   Container(Kafka, "Apache Kafka", "Kafka", "Обеспечивает обмен сообщениями между сервисами приложения")
 ' СУБД
   ContainerDb(UserDatabase, "User Database", "PostgreSQL", "Хранит данные пользователей")
-  ContainerDb(SensorDatabase, "Sensor Database", "PostgreSQL", "Хранит данные датчиков")
-  ContainerDb(CameraDatabase, "Camera Database", "PostgreSQL", "Хранит данные камер")
+  ContainerDb(DeviceDatabase, "Device Database", "PostgreSQL", "Хранит данные устройств")
   ContainerDb(ScenarioDatabase, "Scenario Database", "PostgreSQL", "Хранит данные сценариев")
 }
 ' Внешние системы
@@ -34,32 +32,29 @@ user ..> MobileApp : "Использует приложение"
 WebApp ..> ApiGateway : "Отправляет запросы"
 MobileApp ..> ApiGateway : "Отправляет запросы"
 ' Взаимодействия ApiGateway
-ApiGateway ..> SensorService : "Пересылает запросы к сервису датчиков"
-ApiGateway ..> CameraService : "Пересылает запросы к сервису камер"
+ApiGateway ..> DeviceService : "Пересылает запросы к сервису устройств"
 ApiGateway ..> UserService : "Пересылает запросы к сервису пользователей"
 ApiGateway ..> ScenarioService : "Пересылает запросы к сервису сценариев"
 ' Взаимодействия сервисов с базой данных
-SensorService ..> SensorDatabase : "Читает/Записывает данные"
-CameraService ..> CameraDatabase : "Читает/Записывает данные"
+DeviceService ..> DeviceDatabase : "Читает/Записывает данные"
 UserService ..> UserDatabase : "Читает/Записывает данные"
 ScenarioService ..> ScenarioDatabase : "Читает/Записывает данные"
 ' Взаимодействия сервисов
 MediaServer ..> WebApp : "Передаёт видеопоток [WebRTC]"
 MediaServer ..> MobileApp : "Передаёт видеопоток [WebRTC]"
-SensorService ..> MqttBroker : "Публикует и получает сообщения [MQTT]"
+DeviceService ..> MqttBroker : "Публикует и получает сообщения [MQTT]"
 ScenarioService ..> MqttBroker : "Получает события и публикует команды [MQTT]"
 ' Взаимодействия MQTT брокер
-MqttBroker ..> home : "Обменивается сообщениями с IoT-устройствами [MQTT]"
+MqttBroker <.> home : "Обменивается сообщениями с IoT-устройствами [MQTT]"
 MediaServer ..> home : "Получает видеопотоки с камер [RTSP]"
 ' Взаимодействия Kafka
-SensorService <.> Kafka : "Публикует/получает события"
+DeviceService <.> Kafka : "Публикует/получает события"
 ScenarioService <.> Kafka : "Публикует/получает события"
-CameraService <.> Kafka : "Публикует/получает события"
 MediaServer <.> Kafka : "Публикует/получает события"
 ' Подсказка для рендера
 user -[hidden]down-> MobileApp
 MobileApp -[hidden]down-> ApiGateway
 WebApp -[hidden]left-> MobileApp
 
-Kafka -[hidden]down-> SensorService
+Kafka -[hidden]down-> DeviceService
 @enduml
