@@ -107,7 +107,9 @@
 
 **Диаграмма контейнеров (Containers)**
 
-Добавьте диаграмму.
+[Контекстная диаграмма монолитной системы](diagrams/container/container.puml)
+
+![Контекстная диаграмма монолитной системы](diagrams/container/container.png)
 
 **Диаграмма компонентов (Components)**
 
