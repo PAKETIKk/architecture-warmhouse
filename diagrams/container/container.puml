@@ -27,6 +27,7 @@ Container_Boundary(system, "Система «Тёплый дом»") {
     ' СУБД
     ContainerDb(UserDatabase, "User\nDatabase", "PostgreSQL", "Хранит данные\nпользователей")
     ContainerDb(DeviceDatabase, "Device\nDatabase", "PostgreSQL", "Хранит данные\nустройств")
+    ContainerDb(TelemetryDatabase, "Telemetry\nDatabase", "PostgreSQL", "Хранит данные\nтелеметрии")
     ContainerDb(ScenarioDatabase, "Scenario\nDatabase", "PostgreSQL", "Хранит данные\nсценариев")
     ContainerDb(NotificationDatabase, "Notification\nDatabase", "PostgreSQL", "Хранит данные\nуведомлений")
   }
@@ -49,6 +50,7 @@ ApiGateway ..> ScenarioService : "Пересылает\nзапросы к\nсе�
 ApiGateway ..> NotificationService : "Пересылает\nзапросы к\nсервису уведомлений"
 ' Взаимодействия сервисов с базой данных
 DeviceService .right.> DeviceDatabase : "Читает\nи\nзаписывает\nданные"
+DeviceService .left.> TelemetryDatabase : "Читает\nи\nзаписывает\nданные"
 UserService .right.> UserDatabase : "Читает\nи\nзаписывает\nданные"
 ScenarioService .right.> ScenarioDatabase : "Читает\nи\nзаписывает\nданные"
 NotificationService .right.> NotificationDatabase : "Читает\nи\nзаписывает\nданные"
@@ -68,20 +70,23 @@ ScenarioService <.> Kafka : "Публикует/получает\nсобытия
 MediaServer <.> Kafka : "Публикует/получает\nсобытия"
 NotificationService <.> Kafka : "Публикует/получает\nсобытия"
 ' Подсказка для рендера
-user -[hidden]down-> MobileApp
-user -[hidden]down-> ApiGateway
-WebApp -[hidden]down-> ApiGateway
-MobileApp -[hidden]down-> ApiGateway
-ApiGateway -[hidden]down-> DeviceService
-ApiGateway -[hidden]down-> UserService
-ApiGateway -[hidden]down-> ScenarioService
-ApiGateway -[hidden]down-> NotificationService
+user -[hidden]down- MobileApp
+user -[hidden]down- ApiGateway
+WebApp -[hidden]down- ApiGateway
+MobileApp -[hidden]down- ApiGateway
+ApiGateway -[hidden]down- DeviceService
+ApiGateway -[hidden]down- UserService
+ApiGateway -[hidden]down- ScenarioService
+ApiGateway -[hidden]down- NotificationService
 
-DeviceService -[hidden]down-> Kafka
-ScenarioService -[hidden]down-> Kafka
+DeviceService -[hidden]down- Kafka
+ScenarioService -[hidden]down- Kafka
 
-UserService -[hidden]right-> ScenarioService
+DeviceDatabase -[hidden]down- TelemetryDatabase
 
-MediaServer -[hidden]up-> WebApp
-MediaServer -[hidden]up-> MobileApp
+UserService -[hidden]right- ScenarioService
+
+MediaServer -[hidden]up- WebApp
+MediaServer -[hidden]up- MobileApp
+
 @enduml

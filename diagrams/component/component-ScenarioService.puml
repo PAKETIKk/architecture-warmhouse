@@ -17,15 +17,20 @@ Container(ScenarioService, "Scenario Service") {
 ' Компоненты сервиса сценариев
   Component(ControllerComponent, "Scenario Controller","Обрабатывает HTTP-запросы и маршрутизирует их к соответствующим компонентам")
   Component(ServiceComponent, "Scenario Service", "Обрабатывает бизнес-логику, связанную с сценариями")
-  Component(KafkaComponent, "Kafka Component", "Обеспечивает обмен событиями между сервисами через Kafka")
+  Component(KafkaPublisher, "Kafka Publisher", "Обеспечивает событиями между сервисами через Kafka")
+  Component(KafkaConsumer, "Kafka Consumer", "Обеспечивает событиями между сервисами через Kafka")
   Component(RepositoryComponent, "Repository Layer", "Обеспечивает доступ к данным сценариев в базе данных")
 }
 ' Взаимодействия компонентов
 ControllerComponent ..> ServiceComponent : "Вызывает\nбизнес-логику"
-ServiceComponent ..> RepositoryComponent : "Читает/Записывает\nданные"git 
-ServiceComponent ..> KafkaComponent : "Публикует/получает\nсобытия"
+KafkaConsumer ..> ServiceComponent : "Вызывает\nбизнес-логику"
+ServiceComponent ..> RepositoryComponent : "Читает/Записывает\nданные" 
+ServiceComponent ..> KafkaPublisher : "Публикует\nсобытия"
 RepositoryComponent ..> ScenarioDatabase : "Читает/Записывает\nданные"
 ' Взаимодействия с сервисами
 ApiGateway ..> ControllerComponent : "Пересылает запросы к компоненту контроллера"
-KafkaComponent ..> Kafka : "Публикует/получает\nсобытия"
+KafkaPublisher .right.> Kafka : "Публикует\nсобытия"
+Kafka .left.> KafkaConsumer : "Передаёт\nсобытия"
+' Подсказка для рендера
+RepositoryComponent -[hidden]right- KafkaPublisher
 @enduml

@@ -17,15 +17,20 @@ Container(UserService, "User Service") {
 ' Компоненты сервиса пользователей
   Component(ControllerComponent, "User Controller","Обрабатывает HTTP-запросы и маршрутизирует их к соответствующим компонентам")
   Component(ServiceComponent, "User Service", "Обрабатывает бизнес-логику, связанную с пользователями")
-  Component(KafkaComponent, "Kafka Component", "Обеспечивает обмен событиями между сервисами через Kafka")
+  Component(KafkaPublisher, "Kafka Publisher", "Обеспечивает событиями между сервисами через Kafka")
+  Component(KafkaConsumer, "Kafka Consumer", "Обеспечивает событиями между сервисами через Kafka")
   Component(RepositoryComponent, "Repository Layer", "Обеспечивает доступ к данным пользователей в базе данных")
 }
 ' Взаимодействия компонентов
 ControllerComponent ..> ServiceComponent : "Вызывает\nбизнес-логику"
+KafkaConsumer ..> ServiceComponent : "Вызывает\nбизнес-логику"
 ServiceComponent ..> RepositoryComponent : "Читает/Записывает\nданные"
-ServiceComponent ..> KafkaComponent : "Публикует/получает\nсобытия"
+ServiceComponent ..> KafkaPublisher : "Публикует\nсобытия"
 RepositoryComponent ..> UserDatabase : "Читает/Записывает\nданные"
 ' Взаимодействия с сервисами
 ApiGateway ..> ControllerComponent : "Пересылает запросы к компоненту контроллера"
-KafkaComponent ..> Kafka : "Публикует/получает\nсобытия"
+KafkaPublisher .right.> Kafka : "Публикует\nсобытия"
+Kafka .left.> KafkaConsumer : "Передаёт\nсобытия"
+' Подсказка для рендера
+RepositoryComponent -[hidden]right- KafkaPublisher
 @enduml

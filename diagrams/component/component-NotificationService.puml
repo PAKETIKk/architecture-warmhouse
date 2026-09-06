@@ -20,19 +20,22 @@ Container(NotificationService, "Notification Service") {
 ' Компоненты сервиса уведомлений
   Component(ControllerComponent, "Notification Controller","Обрабатывает HTTP-запросы и маршрутизирует их к соответствующим компонентам")
   Component(ServiceComponent, "Notification Service", "Обрабатывает бизнес-логику, связанную с уведомлениями")
-  Component(KafkaComponent, "Kafka Component", "Обеспечивает обмен событиями между сервисами через Kafka")
+  Component(KafkaPublisher, "Kafka Publisher", "Обеспечивает событиями между сервисами через Kafka")
+  Component(KafkaConsumer, "Kafka Consumer", "Обеспечивает событиями между сервисами через Kafka")
   Component(RepositoryComponent, "Repository Layer", "Обеспечивает доступ к данным уведомлений в базе данных")
   Component(NotificationSenderComponent, "Notification Sender", "Отправляет уведомления пользователям через различные каналы (push, websocket)")
 }
 ' Взаимодействия компонентов
 ControllerComponent ..> ServiceComponent : "Вызывает\nбизнес-логику"
+KafkaConsumer ..> ServiceComponent : "Вызывает\nбизнес-логику"
 ServiceComponent ..> RepositoryComponent : "Читает/Записывает\nданные"
-ServiceComponent ..> KafkaComponent : "Публикует/получает\nсобытия"
-ServiceComponent ..> NotificationSenderComponent : "Отправляет уведомления\nпользователям"
+ServiceComponent ..> KafkaPublisher : "Публикует\nсобытия"
+ServiceComponent ..> NotificationSenderComponent : "Отправляет\nуведомления\nпользователям"
 RepositoryComponent ..> NotificationDatabase : "Читает/Записывает\nданные"
 ' Взаимодействия с сервисами
 ApiGateway ..> ControllerComponent : "Пересылает запросы к компоненту контроллера"
-KafkaComponent ..> Kafka : "Публикует/получает\nсобытия"
-NotificationSenderComponent ..> WebApp : "Отправляет уведомления\nчерез WebSocket"
-NotificationSenderComponent ..> MobileApp : "Отправляет уведомления\nчерез push-уведомления"
+KafkaPublisher .left.> Kafka : "Публикует\nсобытия"
+Kafka .right.> KafkaConsumer : "Передаёт\nсобытия"
+NotificationSenderComponent ..> WebApp : "Отправляет\nуведомления\nчерез WebSocket"
+NotificationSenderComponent ..> MobileApp : "Отправляет\nуведомления\nчерез push-уведомления"
 @enduml
