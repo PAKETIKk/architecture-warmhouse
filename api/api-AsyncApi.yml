@@ -1,0 +1,73 @@
+asyncapi: 3.0.0
+info:
+  title: |
+    Async API
+  version: 1.0.0
+  description: Описание методов асинхронного взаимодействия сервисов
+
+servers:
+  test:
+    host: localhost:9092
+    protocol: kafka
+    description: Сервер тестирования
+
+channels:
+  notifications:
+    address: notification.created
+    messages:
+      notificationCreated:
+        $ref: '#/components/messages/NotificationCreated'
+    description: Очередь на прием данных по новым уведомлениям
+
+operations:
+  publishNotification:
+    summary: Публикация сообщения о новом уведомлении
+    action: send
+    channel:
+      $ref: '#/channels/notifications'
+    messages:
+      - $ref: '#/channels/notifications/messages/notificationCreated'
+
+  consumeNotification:
+    summary: Получение сообщения о новом уведомлении
+    action: receive
+    channel: 
+      $ref: '#/channels/notifications'
+
+components:
+  messages:
+    NotificationCreated:
+      name: NotificationCreated
+      title: Создание уведомления
+      payload:
+        $ref: '#/components/schemas/Notification'
+
+  schemas:
+    Notification:
+      type: object
+      required:
+        - recipientUserId
+        - title
+        - message
+        - type
+        - severity
+        - time
+      properties:
+        recipientUserId:
+          type: string
+          example: ef67b3b2-9d97-4e8c-9716-6d2416de85ce
+        title:
+          type: string
+          example: Камера перестала отвечать
+        message:
+          type: string
+          example: Камера 1 в локации Улица перестала отвечать
+        type:
+          type: string
+          example: CAMERA_OFFLINE
+        severity:
+          type: string
+          example: WARNING
+        time:
+          type: string
+          example: 2026-09-06T20:34:00.000+03:00
