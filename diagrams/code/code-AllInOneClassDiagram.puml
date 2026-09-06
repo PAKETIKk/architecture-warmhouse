@@ -152,7 +152,7 @@ package "Управление пользователями" {
 
     ' Связи
     User "0..*" -- "0..*" UserGroup : belongs to
-    User "1" -- "0..*" HomeMembership : grants access through
+    User "0..*" -- "0..*" HomeMembership : grants access through
     UserGroup "1" -- "0..*" Permission : has
 }
 Scenario -[hidden]right- User
