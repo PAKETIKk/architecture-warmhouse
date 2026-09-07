@@ -6,10 +6,10 @@ info:
   description: Описание методов асинхронного взаимодействия сервисов
 
 servers:
-  test:
+  testKafka:
     host: localhost:9092
     protocol: kafka
-    description: Сервер тестирования
+    description: Сервер тестирования - Kafka
 
 channels:
   notifications:
@@ -20,6 +20,7 @@ channels:
     description: Очередь на прием данных по новым уведомлениям
 
 operations:
+  # Уведомления
   publishNotification:
     summary: Публикация сообщения о новом уведомлении
     action: send
@@ -33,9 +34,11 @@ operations:
     action: receive
     channel: 
       $ref: '#/channels/notifications'
+  
 
 components:
   messages:
+    # Уведомления
     NotificationCreated:
       name: NotificationCreated
       title: Создание уведомления
@@ -43,6 +46,7 @@ components:
         $ref: '#/components/schemas/Notification'
 
   schemas:
+    # Уведомления
     Notification:
       type: object
       required:
