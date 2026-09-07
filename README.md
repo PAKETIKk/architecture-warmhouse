@@ -170,13 +170,13 @@ AsyncAPI будет использоваться сервисов между с�
 
 ### REST API
 
-[api-externalApi.yml](api\api-externalApi.yml)
+[api-externalApi.yml](api/api-externalApi.yml)
 
 ### AsyncAPI
 
-[api-Kafka-AsyncApi.yml](api\api-Kafka-AsyncApi.yml)
+[api-Kafka-AsyncApi.yml](api/api-Kafka-AsyncApi.yml)
 
-[api-MQTT-AsyncApi.yml](api\api-MQTT-AsyncApi.yml)
+[api-MQTT-AsyncApi.yml](api/api-MQTT-AsyncApi.yml)
 
 # Задание 5. Работа с docker и docker-compose
 
