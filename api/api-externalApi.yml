@@ -1,0 +1,224 @@
+openapi: 3.0.0
+info:
+  title: |
+    External API
+  version: 1.0.0
+  description: |
+    Методы:
+    - Получение списка устройств пользователя
+    - Создание нового устройства
+
+servers:
+  - url: https://{host}
+    description: API сервер
+    variables:
+      host:
+        default: api.example.com
+        description: Хост API
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Device Service
+  - name: User Service
+  - name: ...
+
+paths:
+# Device Service
+  /devices:
+    get:
+      summary: Получение списка устройств пользователя
+      tags:
+        - Device Service
+      operationId: GetDevices
+      parameters:
+        - name: page
+          in: query
+          description: Номер страницы
+          required: true
+          schema:
+            type: integer
+        - name: pageSize
+          in: query
+          description: Количество устройств на страницу
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetDevicesResponse'
+        '400':
+          description: Некорректный запрос
+        '401':
+          description: Неавторизованный доступ
+        '403':
+          description: Доступ запрещен
+        '500':
+          description: Внутренняя ошибка сервера
+    post:
+      summary: Создание нового устройства
+      tags:
+        - Device Service
+      operationId: PostDevices
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostDevicesRequest'
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostDevicesResponse'
+        '400':
+          description: Некорректный запрос
+        '401':
+          description: Неавторизованный доступ
+        '403':
+          description: Доступ запрещен
+        '500':
+          description: Внутренняя ошибка сервера
+
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+
+  schemas:
+  # get-tasks
+    GetDevicesResponse:
+      type: object
+      required:
+        - devices
+        - page
+        - pageSize
+        - lastPage
+      properties:
+        devices:
+          type: array
+          description: Список устройств пользователя
+          required:
+            - id
+            - name
+            - type
+            - location
+            - home
+          items:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: string
+                description: ID устройства
+                example: c9d27f77-e4b0-42c7-b924-7f7dcc7bfc09
+              name:
+                type: string
+                description: Наименование устройства
+                example: Датчик отопления. Гостиная
+              type:
+                type: object
+                description: Тип устройства
+                required:
+                  - name
+                  - isCustom
+                properties:
+                  name:
+                    type: string
+                    example: Датчик температуры воздуха
+                  isCustom:
+                    type: boolean
+                    example: false
+                  description:
+                    type: string
+                    example: Измеряет температуру воздуха
+                  Capabilities:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: aff69d30-4c7d-462d-bb69-a551a56b4179
+                        name:
+                          type: string
+                          example: Включить
+                    example:
+                      [
+                        {
+                          "id": "aff69d30-4c7d-462d-bb69-a551a56b4179",
+                          "name": "Включить"
+                          },
+                        {
+                          "id": "ff631fc2-2dd0-4b5f-bd2a-ed5367f67ce0",
+                          "name": "Выключить"
+                          }
+                      ]		
+              location:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: e612bbf9-07c5-4e48-91c3-85f906a616c6
+                  name:
+                    type: string
+                    example: "Гостиная"
+              home:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: ccef925e-2f16-4cb6-9e74-d85af701f839
+                  name:
+                    type: string
+                    example: "Дача"
+        page:
+          type: integer
+          description: Номер страницы
+          example: 0
+        pageSize:
+          type: integer
+          description: Число записей на странице
+          example: 20
+        lastPage:
+          type: boolean
+          example: true
+
+    PostDevicesRequest:
+      type: object
+      required: 
+        - name
+        - deviceTypeId
+        - locationId
+      properties:
+        name:
+          type: string
+          example: "Шлагбаум"
+        deviceTypeId:
+          type: string
+          example: 99ec3fdc-2413-42e8-a640-b2c54ff0a0c4
+        locationId:
+          type: string
+          example: 564a9aec-b57b-4d6c-92f9-7080732a70d9
+    
+    PostDevicesResponse:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: ID нового устройства
+          example: 6fe07c6f-d199-4534-8eaf-a47d18cc39a7
