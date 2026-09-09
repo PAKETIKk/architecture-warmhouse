@@ -1,0 +1,69 @@
+name: PlantUML Diagrams
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  generate-diagrams:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install Graphviz
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y graphviz
+
+      - name: Check Graphviz
+        run: |
+          dot -V
+
+      - name: Download PlantUML
+        run: |
+          wget -O plantuml.jar \
+            https://github.com/plantuml/plantuml/releases/latest/download/plantuml.jar
+
+      - name: Check PlantUML version
+        run: |
+          java -jar plantuml.jar -version
+
+      - name: Generate Diagrams
+        run: |
+          find diagrams -name "*.puml" -print -exec \
+            java -jar plantuml.jar -tpng {} \;
+
+      - name: Check generated files
+        run: |
+          echo "Generated PNG files:"
+          find diagrams -name "*.png" -print
+
+      - name: Commit Diagrams
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          git add diagrams
+
+          if git diff --cached --quiet; then
+            echo "No diagram changes to commit"
+            exit 0
+          fi
+
+          git commit -m "Automated diagram generation"
+          git push origin main

@@ -1,0 +1,43 @@
+@startuml
+title Компонентная диаграмма сервиса устройств
+' Импорт
+!include ../../uml-lib/C4_Component.puml
+' Система
+Container_Boundary(system, "Система «Тёплый дом»"){
+  ' Сервисы
+  Container(DeviceService, "Device Service", "Go", "Реализует функциональность управления устройствами")
+  Container(ApiGateway, "API Gateway", "NGINX", "Обрабатывает входящие запросы и маршрутизирует их к соответствующим сервисам")
+  ' Брокеры сообщений
+  Container(Kafka, "Apache Kafka", "Kafka", "Обеспечивает обмен сообщениями между сервисами приложения")  
+  Container(MqttBroker, "MQTT Broker", "Mosquitto", "Обеспечивает обмен сообщениями между устройствами и сервисами приложения")
+  ' СУБД Device Service
+  ContainerDb(DeviceDatabase, "Device\nDatabase", "PostgreSQL", "Хранит данные\nDeviceService")
+  ContainerDb(TelemetryDatabase, "Telemetry\nDatabase", "PostgreSQL", "Хранит данные\nтелеметрии")
+}
+' Сервис устройств
+Container(DeviceService, "Device Service") {
+' Компоненты сервиса устройств
+  Component(ControllerComponent, "Device Controller","Обрабатывает HTTP-запросы и маршрутизирует их к соответствующим компонентам")
+  Component(ServiceComponent, "Device Service", "Обрабатывает бизнес-логику, связанную с устройствами")
+  Component(KafkaPublisher, "Kafka Publisher", "Обеспечивает событиями между сервисами через Kafka")
+  Component(KafkaConsumer, "Kafka Consumer", "Обеспечивает событиями между сервисами через Kafka")
+  Component(RepositoryComponent, "Repository Layer", "Обеспечивает доступ к данным устройств в базе данных")
+  Component(MqttPublisher, "MQTT Publisher", "Обеспечивает обмен сообщениями между устройствами и сервисами через MQTT")
+  Component(MQTTConsumer, "MQTT Consumer", "Обеспечивает обмен сообщениями между устройствами и сервисами через MQTT")
+}
+' Взаимодействия компонентов
+KafkaConsumer ..> ServiceComponent : "Вызывает бизнес-логику"
+ControllerComponent ..> ServiceComponent : "Вызывает бизнес-логику"
+MQTTConsumer ..> ServiceComponent : "Вызывает бизнес-логику"
+ServiceComponent ..> RepositoryComponent : "Читает/Записывает\nданные"
+ServiceComponent ..> KafkaPublisher : "Публикует события"
+ServiceComponent ..> MqttPublisher : "Публикует сообщения"
+RepositoryComponent ..> DeviceDatabase : "Читает/Записывает\nданные"
+RepositoryComponent ..> TelemetryDatabase : "Читает/Записывает\nданные"
+' Взаимодействия с сервисами
+ApiGateway ..> ControllerComponent : "Пересылает запросы к компоненту контроллера"
+KafkaPublisher .left.> Kafka : "Публикует события"
+Kafka .right.> KafkaConsumer : "Передаёт события"
+MqttPublisher .right.> MqttBroker : "Публикует сообщения"
+MqttBroker .left.> MQTTConsumer : "Передаёт сообщения"
+@enduml

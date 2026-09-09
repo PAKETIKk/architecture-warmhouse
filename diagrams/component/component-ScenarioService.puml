@@ -1,0 +1,36 @@
+@startuml
+title Компонентная диаграмма сервиса сценариев
+' Импорт
+!include ../../uml-lib/C4_Component.puml
+' Система
+Container_Boundary(system, "Система «Тёплый дом»"){
+  ' Сервисы
+  Container(ScenarioService, "Scenario Service", "Go", "Реализует функциональность управления сценариями")
+  Container(ApiGateway, "API Gateway", "NGINX", "Обрабатывает входящие запросы и маршрутизирует их к соответствующим сервисам")
+  ' Брокеры сообщений
+  Container(Kafka, "Apache Kafka", "Kafka", "Обеспечивает обмен сообщениями между сервисами приложения")  
+  ' СУБД Scenario Service
+  ContainerDb(ScenarioDatabase, "Scenario Database", "PostgreSQL", "Хранит данные ScenarioService")
+}
+' Сервис сценариев
+Container(ScenarioService, "Scenario Service") {
+' Компоненты сервиса сценариев
+  Component(ControllerComponent, "Scenario Controller","Обрабатывает HTTP-запросы и маршрутизирует их к соответствующим компонентам")
+  Component(ServiceComponent, "Scenario Service", "Обрабатывает бизнес-логику, связанную с сценариями")
+  Component(KafkaPublisher, "Kafka Publisher", "Обеспечивает событиями между сервисами через Kafka")
+  Component(KafkaConsumer, "Kafka Consumer", "Обеспечивает событиями между сервисами через Kafka")
+  Component(RepositoryComponent, "Repository Layer", "Обеспечивает доступ к данным сценариев в базе данных")
+}
+' Взаимодействия компонентов
+ControllerComponent ..> ServiceComponent : "Вызывает\nбизнес-логику"
+KafkaConsumer ..> ServiceComponent : "Вызывает\nбизнес-логику"
+ServiceComponent ..> RepositoryComponent : "Читает/Записывает\nданные" 
+ServiceComponent ..> KafkaPublisher : "Публикует\nсобытия"
+RepositoryComponent ..> ScenarioDatabase : "Читает/Записывает\nданные"
+' Взаимодействия с сервисами
+ApiGateway ..> ControllerComponent : "Пересылает запросы к компоненту контроллера"
+KafkaPublisher .right.> Kafka : "Публикует\nсобытия"
+Kafka .left.> KafkaConsumer : "Передаёт\nсобытия"
+' Подсказка для рендера
+RepositoryComponent -[hidden]right- KafkaPublisher
+@enduml

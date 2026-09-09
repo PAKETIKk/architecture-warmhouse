@@ -1,0 +1,153 @@
+asyncapi: 3.0.0
+info:
+  title: |
+    Async API
+  version: 1.0.0
+  description: Описание методов асинхронного взаимодействия сервисов
+
+servers:
+  testMQTT:
+    host: localhost:8883
+    protocol: mqtt
+    description: Сервер тестирования - MQTT
+
+channels:
+  # Телеметрия
+  telemetry:
+    address: telemetry.update
+    messages:
+      telemetryUpdated:
+        $ref: '#/components/messages/TelemetryUpdated'
+    description: Очередь на прием данных по новым даанным телеметрии
+  # Устройства
+  devicesStatus:
+    address: devices.status
+    messages:
+      DeviceStatus:
+        $ref: '#/components/messages/DeviceStatus'
+
+  devicesManipulation:
+    address: devices.manipulation
+    messages:
+      DeviceAction:
+        $ref: '#/components/messages/DeviceAction'
+      
+
+operations:
+  # Телеметрия
+  publishTelemetry:
+    summary: Публикация сообщения об обновлении телеметрии
+    action: send
+    channel:
+      $ref: '#/channels/telemetry'
+
+  consumeTelemetry:
+    summary: Получение сообщения об обновлении телеметрии
+    action: receive
+    channel:
+      $ref: '#/channels/telemetry'
+  # Устройства
+  publishDeviceStatus:
+    summary: Публикация сообщения об изменении статуса устройства
+    action: send
+    channel:
+      $ref: '#/channels/devicesStatus'
+
+  consumeDeviceStatus:
+    summary: Получение сообщения об изменении статуса устройства
+    action: receive
+    channel:
+      $ref: '#/channels/devicesStatus'
+
+  publishDeviceAction:
+    summary: Публикация сообщения о действии устройства
+    action: send
+    channel:
+      $ref: '#/channels/devicesManipulation'
+
+  consumeDeviceAction:
+    summary: Получение сообщения о действии устройства
+    action: receive
+    channel:
+      $ref: '#/channels/devicesManipulation'
+  
+
+
+components:
+  messages:
+    # Телеметрия
+    TelemetryUpdated:
+      name: TelemetryUpdated
+      title: Обновление телеметрии
+      payload:
+        $ref: '#/components/schemas/Telemetry'
+    # Устройства
+    DeviceStatus:
+      name: DeviceStatus
+      title: Обновление статуса устройства
+      payload:
+        $ref: '#/components/schemas/DeviceStatus'
+
+    DeviceAction:
+      name: DeviceAction
+      title: Действие устройства
+      payload:
+        $ref: '#/components/schemas/DeviceAction'
+
+  schemas:
+    # Телеметрия
+    Telemetry:
+      type: object
+      required:
+        - deviceId
+        - metric
+        - time
+        - eventId
+      properties:
+        deviceId:
+          type: string
+          example: 58879b40-0609-4d48-bc1c-eb7e140d2144
+        metric:
+          type: string
+          example: Температура
+        time:
+          type: string
+          example: 2026-09-07T20:54:00.000+03:00
+        eventId:
+          type: string
+          example: 9682d05e-1c13-48f9-84d0-4e3e8cb2cff2
+        valueInt:
+          type: integer
+          example: 22
+        valueText:
+          type: string
+          example: 22.7
+        unit:
+          type: string
+          example: °C
+    # Устройства
+    DeviceStatus:
+      type: object
+      required:
+        - deviceId
+        - status
+      properties:
+        deviceId:
+          type: string
+          example: 58879b40-0609-4d48-bc1c-eb7e140d2144
+        status:
+          type: string
+          example: DISCONNECTED
+
+    DeviceAction:
+      type: object
+      required:
+        - deviceId
+        - action
+      properties:
+        deviceId:
+          type: string
+          example: 58879b40-0609-4d48-bc1c-eb7e140d2144
+        action:
+          type: string
+          example: TURN_ON
