@@ -186,4 +186,4 @@ AsyncAPI будет использоваться сервисов между с�
 - `GET /temperature?location=`
 - `GET /temperature/{sensorID}`
 
-Директория - `apps/temperature_api`
+Директория - `apps/temperature_api` 
